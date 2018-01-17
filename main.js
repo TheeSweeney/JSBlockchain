@@ -1,9 +1,8 @@
 const SHA256 = require('crypto-js/sha256');
 
 class Block{
-    constructor(index, timestamp, data, previousHash){
-        this.index = index;;
-        this.timestamp = timestamp;
+    constructor(data, previousHash){
+        this.timestamp = new Date().getTime();
         this.data = data;
         this.previousHash = previousHash;
         this.hash = '';
@@ -15,7 +14,7 @@ class Block{
     }
 
     mineBlock(difficulty){
-        while(this.hash.substring(0, difficulty) !== Array(difficulty +1).join("0")){
+        while(this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
             this.nonce++;
             this.hash = this.calculateHash();
         }
@@ -26,12 +25,15 @@ class Block{
 
 class Blockchain{
     constructor(){
+        this.difficulty = 4;
         this.chain = [this.createGenesisBlock()];
-        this.difficulty = 5;
     }
 
     createGenesisBlock(){
-        return new Block(0, '01/01/2018', "Genesis Block", "0" );
+        let genesisBlock = new Block("Genesis Block", "0" );
+        genesisBlock.mineBlock(this.difficulty);
+
+        return genesisBlock
     }
 
     getLatestBlock(){
@@ -39,6 +41,7 @@ class Blockchain{
     }
 
     addBlock(newBlock){
+        newBlock.index=(this.chain.length)
         newBlock.previousHash = this.getLatestBlock().hash;
         newBlock.mineBlock(this.difficulty)
         this.chain.push(newBlock);
@@ -76,12 +79,13 @@ function alterChain(blockchain, targetBlock, targetKey, newValue){
 }
 
 console.log("Mining block 1... ")
-brianCoin.addBlock(new Block(2, '1/12/2018', {amount: 4}));
+brianCoin.addBlock(new Block({amount: 4}));
 console.log("Mining block 2... ")
-brianCoin.addBlock(new Block(1, '1/12/2018', {amount: 10}));
+brianCoin.addBlock(new Block({amount: 10}));
 console.log("Mining block 3... ")
-brianCoin.addBlock(new Block(1, '1/12/2018', {amount: 14}));
+brianCoin.addBlock(new Block({amount: 14}));
 
+console.log(brianCoin)
 
 console.log("Is blockchain valid? T", brianCoin.isChainValid())
 
@@ -89,4 +93,5 @@ alterChain(brianCoin, 1, "amount", 200)
 
 console.log("Is blockchain valid? T(F)", brianCoin.isChainValid())
 
+console.log(brianCoin)
 // console.log(JSON.stringify(brianCoin, null, 4))
