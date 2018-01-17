@@ -56,13 +56,33 @@ let brianCoin = new Blockchain();
 
 brianCoin.addBlock(new Block(2, '1/12/2018', {amount: 4}));
 brianCoin.addBlock(new Block(1, '1/12/2018', {amount: 10}));
+brianCoin.addBlock(new Block(1, '1/12/2018', {amount: 14}));
 
-console.log("Is blockchain valid? ", brianCoin.isChainValid())
+console.log("Is blockchain valid? T", brianCoin.isChainValid())
 
 brianCoin.chain[1].data = {amount: 100}
 brianCoin.chain[1].hash = brianCoin.chain[1].calculateHash()
 
-console.log("Is blockchain valid? ", brianCoin.isChainValid())
+console.log("Is blockchain valid? F", brianCoin.isChainValid())
 
+function alterChain(blockchain, targetBlock, targetKey, newValue){
+    for(var i = targetBlock; i < blockchain.length; i++){
+        blockchain[targetBlock][targetKey] = newValue;
+        
+        const newHash = blockchain[targetBlock].calculateHash();
+        
+        blockchain[targetBlock].hash = newHash;
+        blockchain[targetBlock + 1].previousHash = newHash;
+    }
+}
+
+brianCoin.chain[1].data = {amount: 4}
+brianCoin.chain[1].hash = brianCoin.chain[1].calculateHash()
+
+console.log("Is blockchain valid? T", brianCoin.isChainValid())
+
+alterChain(brianCoin, 1, "amount", 200)
+
+console.log("Is blockchain valid? T(F)", brianCoin.isChainValid())
 
 // console.log(JSON.stringify(brianCoin, null, 4))
