@@ -2,21 +2,32 @@ const SHA256 = require('crypto-js/sha256');
 
 class Block{
     constructor(index, timestamp, data, previousHash){
-        this.index = index;
-        this.timestamp = timestamp
-        this.data = data
-        this.previousHash = previousHash
-        this.hash = ''
+        this.index = index;;
+        this.timestamp = timestamp;
+        this.data = data;
+        this.previousHash = previousHash;
+        this.hash = '';
+        this.nonce = 0;
     }
 
     calculateHash(){
-        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
+        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString();
+    }
+
+    mineBlock(difficulty){
+        while(this.hash.substring(0, difficulty) !== Array(difficulty +1).join("0")){
+            this.nonce++;
+            this.hash = this.calculateHash();
+        }
+
+        console.log("Block minded: " + this.hash)
     }
 }
 
 class Blockchain{
     constructor(){
         this.chain = [this.createGenesisBlock()];
+        this.difficulty = 5;
     }
 
     createGenesisBlock(){
@@ -29,7 +40,7 @@ class Blockchain{
 
     addBlock(newBlock){
         newBlock.previousHash = this.getLatestBlock().hash;
-        newBlock.hash = newBlock.calculateHash();
+        newBlock.mineBlock(this.difficulty)
         this.chain.push(newBlock);
     }
 
@@ -53,18 +64,6 @@ class Blockchain{
 
 let brianCoin = new Blockchain();
 
-
-brianCoin.addBlock(new Block(2, '1/12/2018', {amount: 4}));
-brianCoin.addBlock(new Block(1, '1/12/2018', {amount: 10}));
-brianCoin.addBlock(new Block(1, '1/12/2018', {amount: 14}));
-
-console.log("Is blockchain valid? T", brianCoin.isChainValid())
-
-brianCoin.chain[1].data = {amount: 100}
-brianCoin.chain[1].hash = brianCoin.chain[1].calculateHash()
-
-console.log("Is blockchain valid? F", brianCoin.isChainValid())
-
 function alterChain(blockchain, targetBlock, targetKey, newValue){
     for(var i = targetBlock; i < blockchain.length; i++){
         blockchain[targetBlock][targetKey] = newValue;
@@ -76,8 +75,13 @@ function alterChain(blockchain, targetBlock, targetKey, newValue){
     }
 }
 
-brianCoin.chain[1].data = {amount: 4}
-brianCoin.chain[1].hash = brianCoin.chain[1].calculateHash()
+console.log("Mining block 1... ")
+brianCoin.addBlock(new Block(2, '1/12/2018', {amount: 4}));
+console.log("Mining block 2... ")
+brianCoin.addBlock(new Block(1, '1/12/2018', {amount: 10}));
+console.log("Mining block 3... ")
+brianCoin.addBlock(new Block(1, '1/12/2018', {amount: 14}));
+
 
 console.log("Is blockchain valid? T", brianCoin.isChainValid())
 
